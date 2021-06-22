@@ -6,3 +6,74 @@
 #canvas{
     background-color:#202020;
 }
+
+#score{
+    position: absolute;
+    padding: .5em;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    background-color: burlywood;
+    border-radius: .5em;
+    margin: .5em;
+    color: #151515;
+}
+
+#full-screen{
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    bottom: 0px;
+    left: 0px;
+    display: grid;
+    grid-template-columns: 25% 50% 25%;
+    grid-template-rows: 30% 40% 30%;
+    align-content: center;
+    justify-content: center;
+}
+
+#container{
+    grid-column: 2;
+    grid-row: 2;
+    align-self: fill;
+    justify-self: fill;
+    background-color: slateblue;
+
+   border-radius: 3rem;
+
+   display: grid;
+   grid-template-rows: 40% 20% 40%;
+   justify-content: center;
+}
+h1 ,p{
+    color: salmon;
+    align-self: center;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+
+    justify-self: center;
+}
+h1{
+    font-size:5rem;
+}
+p{
+    font-size: 3rem;
+}
+button{
+    border-radius: .5rem;
+    padding: .3em;
+    color: salmon;
+    align-self: center;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    font-size: 3rem;
+    justify-self: center;
+}
+@media (max-height: 650px) {
+    h1{
+        font-size: 3rem;
+    }
+    p{
+        font-size: 2rem;
+    }
+    button{
+        font-size: 2rem;
+    }
+    
+}

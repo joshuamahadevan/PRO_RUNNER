@@ -122,6 +122,11 @@ addEventListener("keydown", function asdf (ev) {
 
 addEventListener("resize",resize);
 
+document.querySelector("button").addEventListener("click", () =>{
+    console.log("refreshing");
+    location.reload();
+})
+
 //functions for the game
 
 function drawScene(){
@@ -156,6 +161,8 @@ function randomElement(){
 }
 function terminate(){
     cancelAnimationFrame(reqId);
+    document.getElementById("full-screen").style="display: grid"
+    document.querySelector("h1").innerHTML=score;
 }
 
 //game logic
@@ -180,7 +187,6 @@ function play(){
     reqId=requestAnimationFrame(play)
     resize(); //updates UP, DOWN, sections, secWidth, and elements according to screen size
     x+=Math.floor(secWidth/30);
-    score+=1;
 
     //updating elements based on new size properties and shifting them to porduce a sense of motion
     for (let i=0; i<elements.length; i++){
@@ -194,11 +200,15 @@ function play(){
     drawElements();
     player.draw();
 
+
+
     //checking for collisions
     checkCollisions();
 
     //identifying 
     if(x>=secWidth){
+        score+=10;
+        document.getElementById("score").innerHTML=`SCORE :${score}`
         elements.splice(0,1);
         x=0;
     }
