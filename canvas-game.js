@@ -18,7 +18,10 @@ function resize(){
         secWidth=Math.floor(innerWidth/sections);
     }while( secWidth>500 || secWidth<200)
     player.x=Math.floor(secWidth/2);
-    player.size=Math.floor((DOWN-UP)/3);
+    player.size=Math.floor((DOWN-UP)/3)-20;
+    if(player.size>secWidth/2-30){
+        player.size=secWidth/2-30;
+    }
     do{
         if(elements.length<sections+1){
             elements.push(randomElement());
@@ -35,7 +38,7 @@ class Player{
         this.pos=pos;
     }
     draw() {
-        c.fillStyle="rgba(255, 23, 243,.9)";
+        c.fillStyle="rgb(255, 23, 243)";
         if(this.pos=="d"){
             c.fillRect(this.x,DOWN-this.size,this.size,this.size);
         }
@@ -60,6 +63,26 @@ class Hole{
             c.fillRect(this.start,DOWN,this.width,innerHeight-DOWN)
         }       
     }
+    checkCollision(){
+        if(this.pos==player.pos){
+            let flag=0;
+            if(player.x > this.start && player.x < this.start+this.width){
+                flag+=1;
+            }
+            if(player.x+player.size/2 > this.start && player.x+player.size/2 < this.start+this.width){
+                flag+=1;
+            }
+            if(player.x+player.size > this.start && player.x+player.size < this.start+this.width){
+                flag+=1;
+            }
+            if(flag>1){
+                terminate();
+                return true;
+            }else{
+                return false;
+            }
+        }
+    }
 }
 
 class Empty{
@@ -71,6 +94,9 @@ class Empty{
         c.fillStyle="#202020"
         c.fillRect(this.start,0,this.width,UP);
         c.fillRect(this.start,DOWN,this.width,innerHeight-DOWN);
+    }
+    checkCollision(){
+        return false;
     }
 }
 //game controls - event listeners
@@ -110,6 +136,13 @@ function drawElements(){
         elements[i].draw();
     }
 }
+function checkCollisions(){
+    for (let i=0; i<elements.length; i++){
+        if(elements[i].checkCollision()){
+            break;
+        }
+    }
+}
 function randomElement(){
     let x=Math.random();
 
@@ -121,6 +154,9 @@ function randomElement(){
         return new Empty(0,0);
     }
 }
+function terminate(){
+    cancelAnimationFrame(reqId);
+}
 
 //game logic
 var player=new Player(secWidth/2, Math.floor((DOWN-UP)/2),"d");
@@ -128,7 +164,6 @@ var player=new Player(secWidth/2, Math.floor((DOWN-UP)/2),"d");
 var sections=5;
 var secWidth=Math.floor(innerWidth/sections);
 
-var hurdles=[];
 var elements=[];
 
 elements.push(new Empty(0,0));
@@ -138,15 +173,19 @@ elements.push(new Empty(0,0));
 resize(); //also updates sections and secWidth variables if change needed
 
 var x=0;
+var score=0;
+var reqId;
 
-function moveScene(){
-    x+=innerWidth/200;
-    resize();
+function play(){
+    reqId=requestAnimationFrame(play)
+    resize(); //updates UP, DOWN, sections, secWidth, and elements according to screen size
+    x+=Math.floor(secWidth/30);
+    score+=1;
 
     //updating elements based on new size properties and shifting them to porduce a sense of motion
     for (let i=0; i<elements.length; i++){
-        elements[i].start=i*secWidth-x-15;
-        elements[i].width=secWidth-30;
+        elements[i].start=i*secWidth-x-60;
+        elements[i].width=secWidth-120;
     }
    
     //drawing elements on the canvas
@@ -155,11 +194,16 @@ function moveScene(){
     drawElements();
     player.draw();
 
+    //checking for collisions
+    checkCollisions();
+
     //identifying 
     if(x>=secWidth){
         elements.splice(0,1);
         x=0;
     }
-    requestAnimationFrame(moveScene)
+
 }
-moveScene();
+
+play()
+
