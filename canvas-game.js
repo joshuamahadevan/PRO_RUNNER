@@ -39,14 +39,29 @@ class Player{
         this.x=x;
         this.size=size;
         this.pos=pos;
+        this.y=DOWN-size;
     }
     draw() {
+        this.update();
         c.fillStyle="rgb(255, 23, 243)";
         if(this.pos=="d"){
-            c.fillRect(this.x,DOWN-this.size,this.size,this.size);
+            c.fillRect(this.x,this.y,this.size,this.size);
         }
         else if(this.pos=="u"){
-            c.fillRect(this.x,UP,this.size,this.size);
+            c.fillRect(this.x,this.y,this.size,this.size);
+        }
+    }
+    update(){
+        let speed=Math.floor((DOWN-UP)/15);
+        if(this.pos=="d"){
+            this.y+=speed;
+        }else if(this.pos=="u"){
+            this.y-=speed;
+        }
+        if(this.y < UP){
+            this.y=UP;
+        }else if(this.y > DOWN-this.size){
+            this.y=DOWN-this.size;
         }
     }
 }
@@ -67,7 +82,7 @@ class Hole{
         }       
     }
     checkCollision(){
-        if(this.pos==player.pos){
+        if((this.pos=="d" && player.y==DOWN-player.size) || (this.pos=="u" && player.y==UP)){
             let flag=0;
             if(player.x > this.start && player.x < this.start+this.width){
                 flag+=1;
@@ -131,6 +146,7 @@ document.querySelector("button").addEventListener("click", () =>{
 })
 
 addEventListener("load", () => {
+    resize();
     document.getElementById("score").innerHTML=`SCORE :0 <br> HIGHSCORE : ${localStorage.getItem("highscore")==null ? 0 : localStorage.getItem("highscore")}`
 })
 //functions for the game
@@ -180,6 +196,7 @@ function terminate(){
 
 //game logic
 var player=new Player(secWidth/2, Math.floor((DOWN-UP)/2),"d");
+console.log(player);
 
 var sections=5;
 var secWidth=Math.floor(innerWidth/sections);
@@ -191,6 +208,9 @@ elements.push(new Empty(0,0));
 elements.push(new Empty(0,0));
 
 resize(); //also updates sections and secWidth variables if change needed
+player.y=DOWN-player.size;
+
+console.log(player)
 
 var x=0;
 var score=0;
