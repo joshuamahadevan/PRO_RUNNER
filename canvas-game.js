@@ -19,6 +19,9 @@ function resize(){
     }while( secWidth>500 || secWidth<200)
     player.x=Math.floor(secWidth/2);
     player.size=Math.floor((DOWN-UP)/3)-20;
+    if(player.size > secWidth/2.5-30){
+        player.size= Math.floor(secWidth/2.5-30);
+    }
     if(player.size>secWidth/2-30){
         player.size=secWidth/2-30;
     }
@@ -127,6 +130,9 @@ document.querySelector("button").addEventListener("click", () =>{
     location.reload();
 })
 
+addEventListener("load", () => {
+    document.getElementById("score").innerHTML=`SCORE :0 <br> HIGHSCORE : ${localStorage.getItem("highscore")==null ? 0 : localStorage.getItem("highscore")}`
+})
 //functions for the game
 
 function drawScene(){
@@ -163,6 +169,13 @@ function terminate(){
     cancelAnimationFrame(reqId);
     document.getElementById("full-screen").style="display: grid"
     document.querySelector("h1").innerHTML=score;
+    if(localStorage.getItem("highscore")==null){
+        localStorage.setItem("highscore", score);
+        console.log("updated highscore");
+    }
+    else if(localStorage.getItem("highscore") < score){
+        localStorage.setItem("highscore", score)
+    }
 }
 
 //game logic
@@ -190,8 +203,8 @@ function play(){
 
     //updating elements based on new size properties and shifting them to porduce a sense of motion
     for (let i=0; i<elements.length; i++){
-        elements[i].start=i*secWidth-x-60;
-        elements[i].width=secWidth-120;
+        elements[i].start=i*secWidth-x-secWidth/3;
+        elements[i].width=secWidth-2*secWidth/3;
     }
    
     //drawing elements on the canvas
@@ -208,7 +221,7 @@ function play(){
     //identifying 
     if(x>=secWidth){
         score+=10;
-        document.getElementById("score").innerHTML=`SCORE :${score}`
+        document.getElementById("score").innerHTML=`SCORE :${score} <br> HIGHSCORE : ${localStorage.getItem("highscore")==null ? 0 : localStorage.getItem("highscore")}`
         elements.splice(0,1);
         x=0;
     }
