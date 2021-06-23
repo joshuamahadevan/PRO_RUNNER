@@ -43,7 +43,7 @@ class Player{
     }
     draw() {
         this.update();
-        c.fillStyle="rgb(255, 23, 243)";
+        c.fillStyle= "#FF4F58FF";
         if(this.pos=="d"){
             c.fillRect(this.x,this.y,this.size,this.size);
         }
@@ -73,7 +73,7 @@ class Hole{
         this.pos=pos;
     }
     draw(){   
-        c.fillStyle="red";    
+        c.fillStyle="#F0F6F7FF";    
         if(this.pos==="u"){
             c.fillRect(this.start,0,this.width,UP);
         }
@@ -109,7 +109,7 @@ class Empty{
         this.width=width;
     }
     draw(){
-        c.fillStyle="#202020"
+        c.fillStyle="#669DB3FF"
         c.fillRect(this.start,0,this.width,UP);
         c.fillRect(this.start,DOWN,this.width,innerHeight-DOWN);
     }
@@ -152,9 +152,9 @@ addEventListener("load", () => {
 //functions for the game
 
 function drawScene(){
-    c.fillStyle="#404040";
+    c.fillStyle="#F0F6F7FF";
     c.fillRect(0,UP,innerWidth,DOWN-UP);
-    c.fillStyle="#202020";
+    c.fillStyle="#669DB3FF";
     c.fillRect(0,0,innerWidth,UP);
     c.fillRect(0,DOWN,innerWidth,innerHeight-DOWN);
 }
@@ -183,6 +183,8 @@ function randomElement(){
 }
 function terminate(){
     cancelAnimationFrame(reqId);
+    c.fillStyle = "rgba(50,50,50,.2)";
+    c.fillRect(0,0,c.canvas.width,c.canvas.height);
     document.getElementById("full-screen").style="display: grid"
     document.querySelector("h1").innerHTML=score;
     if(localStorage.getItem("highscore")==null){
@@ -196,7 +198,6 @@ function terminate(){
 
 //game logic
 var player=new Player(secWidth/2, Math.floor((DOWN-UP)/2),"d");
-console.log(player);
 
 var sections=5;
 var secWidth=Math.floor(innerWidth/sections);
@@ -209,8 +210,6 @@ elements.push(new Empty(0,0));
 
 resize(); //also updates sections and secWidth variables if change needed
 player.y=DOWN-player.size;
-
-console.log(player)
 
 var x=0;
 var score=0;
