@@ -17,7 +17,6 @@ function resize(){
         }
         secWidth=Math.floor(innerWidth/sections);
     }while( secWidth>500 || secWidth<200)
-    player.x=Math.floor(secWidth/2);
     player.size=Math.floor((DOWN-UP)/3)-20;
     if(player.size > secWidth/2.5-30){
         player.size= Math.floor(secWidth/2.5-30);
@@ -40,28 +39,53 @@ class Player{
         this.size=size;
         this.pos=pos;
         this.y=DOWN-size;
+        this.angle=0;
+        this.transition=15;
     }
     draw() {
         this.update();
         c.fillStyle= "#FF4F58FF";
+        c.save();
+        c.translate(this.x,this.y);
+        c.rotate(this.angle);
+        
         if(this.pos=="d"){
-            c.fillRect(this.x,this.y,this.size,this.size);
+            c.beginPath();
+            c.moveTo(0,0);
+            c.lineTo(this.size,0);
+            c.lineTo(this.size/2,-this.size)
+            c.fill();
         }
         else if(this.pos=="u"){
-            c.fillRect(this.x,this.y,this.size,this.size);
+            c.beginPath();
+            c.moveTo(0,0);
+            c.lineTo(this.size,0);
+            c.lineTo(this.size/2,-this.size)
+            c.fill();
         }
+        console.log(this.angle)
+        c.restore();
     }
     update(){
-        let speed=Math.floor((DOWN-UP)/15);
+        let speedY=Math.floor((DOWN-UP)/this.transition);
+        let speedX=Math.floor(this.size/this.transition)
         if(this.pos=="d"){
-            this.y+=speed;
+            this.y+=speedY;
+            this.x-=speedX;
+            this.angle+=Math.PI/this.transition;
         }else if(this.pos=="u"){
-            this.y-=speed;
+            this.x+=speedX;
+            this.y-=speedY;
+            this.angle-=Math.PI/this.transition;
         }
         if(this.y < UP){
             this.y=UP;
-        }else if(this.y > DOWN-this.size){
-            this.y=DOWN-this.size;
+            this.x=Math.floor(secWidth/2)+this.size;
+            this.angle=-Math.PI;
+        }else if(this.y > DOWN){
+            this.y=DOWN;
+            this.x=Math.floor(secWidth/2);
+            this.angle=0;
         }
     }
 }
@@ -73,7 +97,7 @@ class Hole{
         this.pos=pos;
     }
     draw(){   
-        c.fillStyle="#F0F6F7FF";    
+        c.fillStyle="rgba(240, 246, 247, .95)";    
         if(this.pos==="u"){
             c.fillRect(this.start,0,this.width,UP);
         }
@@ -82,7 +106,7 @@ class Hole{
         }       
     }
     checkCollision(){
-        if((this.pos=="d" && player.y==DOWN-player.size) || (this.pos=="u" && player.y==UP)){
+        if(this.pos=="d" && player.y==DOWN){
             let flag=0;
             if(player.x > this.start && player.x < this.start+this.width){
                 flag+=1;
@@ -91,6 +115,23 @@ class Hole{
                 flag+=1;
             }
             if(player.x+player.size > this.start && player.x+player.size < this.start+this.width){
+                flag+=1;
+            }
+            if(flag>1){
+                terminate();
+                return true;
+            }else{
+                return false;
+            }
+        }else if(this.pos=="u" && player.y==UP){
+            let flag=0;
+            if(player.x > this.start && player.x < this.start+this.width){
+                flag+=1;
+            }
+            if(player.x-player.size/2 > this.start && player.x-player.size/2 < this.start+this.width){
+                flag+=1;
+            }
+            if(player.x-player.size > this.start && player.x-player.size < this.start+this.width){
                 flag+=1;
             }
             if(flag>1){
@@ -138,6 +179,13 @@ addEventListener("keydown", function asdf (ev) {
     }
 });
 
+addEventListener("keydown", function asdf (ev) {
+    if (ev.key==="q"){
+        this.cancelAnimationFrame(reqId)    
+        play1=0
+    }
+});
+
 addEventListener("resize",resize);
 
 document.querySelector("button").addEventListener("click", () =>{
@@ -149,10 +197,12 @@ addEventListener("load", () => {
     resize();
     document.getElementById("score").innerHTML=`SCORE :0 <br> HIGHSCORE : ${localStorage.getItem("highscore")==null ? 0 : localStorage.getItem("highscore")}`
 })
+
+
 //functions for the game
 
 function drawScene(){
-    c.fillStyle="#F0F6F7FF";
+    c.fillStyle="rgba(240, 246, 247, .95)";
     c.fillRect(0,UP,innerWidth,DOWN-UP);
     c.fillStyle="#669DB3FF";
     c.fillRect(0,0,innerWidth,UP);
@@ -214,11 +264,16 @@ player.y=DOWN-player.size;
 var x=0;
 var score=0;
 var reqId;
+var play1=1;
 
 function play(){
-    reqId=requestAnimationFrame(play)
+    if(play1){
+        reqId=requestAnimationFrame(play)
+    }
+
     resize(); //updates UP, DOWN, sections, secWidth, and elements according to screen size
-    x+=Math.floor(secWidth/30);
+    x+=Math.floor(secWidth/30+score/100);
+    player.transition=20-Math.floor(score/200)
 
     //updating elements based on new size properties and shifting them to porduce a sense of motion
     for (let i=0; i<elements.length; i++){
