@@ -41,6 +41,7 @@ class Player{
         this.y=DOWN-size;
         this.angle=0;
         this.transition=15;
+        this.invincible=false;
         this.cx=0;
         this.cy=0;
     }
@@ -51,20 +52,12 @@ class Player{
         c.rotate(this.angle);
         c.fillStyle= "#FF4F58FF";
         
-        if(this.pos=="d"){
-            c.beginPath();
-            c.moveTo(0,0);
-            c.lineTo(this.size,0);
-            c.lineTo(this.size/2,-this.size)
-            c.fill();
-        }
-        else if(this.pos=="u"){
-            c.beginPath();
-            c.moveTo(0,0);
-            c.lineTo(this.size,0);
-            c.lineTo(this.size/2,-this.size)
-            c.fill();
-        }
+        c.beginPath();
+        c.moveTo(0,0);
+        c.lineTo(this.size,0);
+        c.lineTo(this.size/2,-this.size)
+        c.fill();
+
         c.restore();
     }
     update(){
@@ -147,11 +140,11 @@ class Hole{
 }
 
 class MovingObstacle{
-    constructor (start,width){
+    constructor (start,width,direction){
         this.start=start;
         this.width=width;
-        this.y=Math.floor(UP+this.width/2);
-        this.direction="d";
+        this.y=Math.floor((UP+this.width/2)+(Math.random() * (DOWN-UP-this.width)));
+        this.direction=direction;
     }
     draw(){
         this.update();
@@ -201,6 +194,61 @@ class Empty{
         return false;
     }
 }
+
+
+var icount=0;
+var scount=0;
+
+class Powerup{
+    constructor(type , x, yfr){
+        this.type=type;
+        this.x=x;
+        this.yfr=yfr;
+    }
+
+    draw(){
+        let img;
+        img=new Image();
+        if (this.type=="invincible"){
+            img.src="./svgs/invincible.svg"
+        }
+        else if(this.type="slowdown"){
+            img.src="./svgs/slowdown.svg"
+        }
+        c.drawImage(img,this.x,this.yfr*(DOWN-UP)+UP,secWidth/4,secWidth/4);
+    }
+
+    checkCollision(){
+        if(Math.sqrt(Math.pow(this.x-player.cx,2)+Math.pow(this.yfr*(DOWN-UP)+UP-player.cy,2)) < secWidth/3+player.size/2.5){
+            console.log("collision detected")
+            if (this.type=="invincible"){
+                icount+=1
+                player.invincible=true;
+                setTimeout(() => {
+                    icount-=1;
+                    if(icount==0){
+                        player.invincible=false;
+                    }           
+                }, 5000);
+            }
+            else if(this.type="slowdown"){
+                slowdown=true;
+                scount+=1;
+                setTimeout(() => {
+                    scount-=1;
+                    if(scount==0){
+                        slowdown=false;
+                    }
+                }, 5000);
+            }
+            this.x=-100;
+        }else{
+            return;
+        }
+    }
+
+
+}
 //game controls - event listeners
 
 addEventListener("mousedown", ()=>{
@@ -212,7 +260,7 @@ addEventListener("mousedown", ()=>{
 });
 
 
-addEventListener("keydown", function asdf (ev) {
+addEventListener("keydown", (ev) => {
     if (ev.key===" "){
         if(player.pos=="d"){
             player.pos="u";
@@ -222,7 +270,7 @@ addEventListener("keydown", function asdf (ev) {
     }
 });
 
-addEventListener("keydown", function asdf (ev) {
+addEventListener("keydown",(ev) => {
     if (ev.key==="q"){
         this.cancelAnimationFrame(reqId)    
         play1=0
@@ -256,26 +304,40 @@ function drawElements(){
     }
 }
 function checkCollisions(){
-    for (let i=0; i<elements.length; i++){
-        if(elements[i].checkCollision()){
+    if(!player.invincible){
+    elements.forEach( (e) => {
+        if(e.checkCollision()){
             terminate();
-            break;
         }
+    })        
     }
+    powerups.forEach( (e) => {
+        if(e.checkCollision()){
+            terminate();
+        }
+    })  
 }
 function randomElement(){
     let x=Math.random();
+
+    if( Math.floor(100*x)%10 == 0){
+        if(Math.random()>.5){
+            powerups.push(new Powerup("slowdown", innerWidth+Math.random()*secWidth,Math.random()))
+        }else{
+            powerups.push(new Powerup("invincible", innerWidth+Math.random()*secWidth,Math.random()))
+        }
+
+    }
 
     if(x < .15){
         return new Hole(0,0,"d");
     }else if(x>.85){
         return new Hole(0,0,"u");
     }else if( .45<x && x<.55){
-        return new MovingObstacle(0,0);
+        return new MovingObstacle(0,0, (Math.random() > .75) ? "d" : "u");
     }else {
         return new Empty(0,0);
-    }
-    
+    }  
 }
 function terminate(){
     cancelAnimationFrame(reqId);
@@ -298,6 +360,7 @@ var sections=5;
 var secWidth=Math.floor(innerWidth/sections);
 
 var elements=[];
+var powerups=[];
 
 elements.push(new Empty(0,0));
 elements.push(new Empty(0,0));
@@ -310,15 +373,23 @@ var x=0;
 var score=0;
 var reqId;
 var play1=1;
+var slowdown=false;
 
 function play(){
     if(play1){
         reqId=requestAnimationFrame(play)
     }
 
+
     resize(); //updates UP, DOWN, sections, secWidth, and elements according to screen size
-    x+=Math.floor(secWidth/30+score/100);
-    player.transition=20-Math.floor(score/200)
+    if(!slowdown){
+        x+=Math.floor(secWidth/30+score/100);
+        player.transition=20-Math.floor(score/200)
+    }else{
+        x+=secWidth/30;
+        player.transition=20;
+    }
+    
 
     //updating elements based on new size properties and shifting them to porduce a sense of motion
     for (let i=0; i<elements.length; i++){
@@ -329,12 +400,24 @@ function play(){
     //drawing elements on the canvas
     drawScene();
     drawElements();
+    if(powerups.length){
+        if(powerups[0].x < -100){
+            powerups.shift();
+        }
+    }
+
+    powerups.forEach( (e) =>{
+        e.x-=(slowdown)? secWidth/30 : secWidth/30+score/100
+        e.draw();
+    })
     player.draw();
 
 
 
     //checking for collisions
     checkCollisions();
+    
+
 
     //identifying 
     if(x>=secWidth){
