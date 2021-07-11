@@ -215,7 +215,14 @@ class Powerup{
         else if(this.type="slowdown"){
             img.src="./svgs/slowdown.svg"
         }
-        c.drawImage(img,this.x,this.yfr*(DOWN-UP)+UP,secWidth/4,secWidth/4);
+        if(this.yfr*(DOWN-UP)>secWidth/4 && (1-this.yfr)*(DOWN-UP)>secWidth/4){
+            c.drawImage(img,this.x,this.yfr*(DOWN-UP)+UP,secWidth/4,secWidth/4);
+        }else if(this.yfr*(DOWN-UP)<secWidth/4){
+            c.drawImage(img,this.x,UP,secWidth/4,secWidth/4);
+        }else if((1-this.yfr)*(DOWN-UP)>secWidth/4){
+            c.drawImage(img,this.x,DOWN-secWidth/4,secWidth/4,secWidth/4);
+        }
+        
     }
 
     checkCollision(){
@@ -224,9 +231,11 @@ class Powerup{
             if (this.type=="invincible"){
                 icount+=1
                 player.invincible=true;
+                document.getElementById("invincible").style.display="";
                 setTimeout(() => {
                     icount-=1;
                     if(icount==0){
+                        document.getElementById("invincible").style.display="none";
                         player.invincible=false;
                     }           
                 }, 5000);
@@ -234,9 +243,11 @@ class Powerup{
             else if(this.type="slowdown"){
                 slowdown=true;
                 scount+=1;
+                document.getElementById("slowdown").style.display="";
                 setTimeout(() => {
                     scount-=1;
                     if(scount==0){
+                        document.getElementById("slowdown").style.display="none";
                         slowdown=false;
                     }
                 }, 5000);
@@ -374,6 +385,9 @@ var score=0;
 var reqId;
 var play1=1;
 var slowdown=false;
+
+document.getElementById("slowdown").style.display="none";
+document.getElementById("invincible").style.display="none";
 
 function play(){
     if(play1){
