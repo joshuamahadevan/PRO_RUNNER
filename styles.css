@@ -88,6 +88,16 @@ button{
     justify-self: center;
 }
 @media (max-height: 800px) {
+    #container{
+        border-radius: 2rem;
+    }
+    #powerups > img{
+        height: 50px;
+        width: 50px;
+    }
+    h2{
+        font-size: 1rem;
+    }
     h1{
         font-size: 3rem;
     }
@@ -104,6 +114,16 @@ button{
 }
 
 @media (max-height: 500px) {
+    #container{
+        border-radius: 1rem;
+    }
+    #powerups > img{
+        height: 30px;
+        width: 30px;
+    }
+    h2{
+        font-size: .7rem;
+    }
     h1{
         font-size: 2rem;
     }

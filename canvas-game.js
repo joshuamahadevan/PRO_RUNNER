@@ -25,12 +25,12 @@ function resize(){
         player.size=secWidth/2-30;
     }
     do{
-        if(elements.length<sections+1){
+        if(elements.length<sections+2){
             elements.push(randomElement());
-        }else if(elements.length>sections+1){
-            elements.splice(elements.length-1,1);
+        }else if(elements.length>sections+2){
+            elements.splice(elements.length,1);
         }
-    }while( elements.length != sections+1 )
+    }while( elements.length != sections+2 )
 }
 
 class Player{
@@ -216,10 +216,13 @@ class Powerup{
             img.src="./svgs/slowdown.svg"
         }
         if(this.yfr*(DOWN-UP)>secWidth/4 && (1-this.yfr)*(DOWN-UP)>secWidth/4){
+            c.strokeRect(this.x,this.yfr*(DOWN-UP)+UP,secWidth/4,secWidth/4);
             c.drawImage(img,this.x,this.yfr*(DOWN-UP)+UP,secWidth/4,secWidth/4);
         }else if(this.yfr*(DOWN-UP)<secWidth/4){
+            c.strokeRect(this.x,UP,secWidth/4,secWidth/4);
             c.drawImage(img,this.x,UP,secWidth/4,secWidth/4);
         }else if((1-this.yfr)*(DOWN-UP)>secWidth/4){
+            c.strokeRect(this.x,DOWN-secWidth/4,secWidth/4,secWidth/4);
             c.drawImage(img,this.x,DOWN-secWidth/4,secWidth/4,secWidth/4);
         }
         
@@ -227,7 +230,10 @@ class Powerup{
 
     checkCollision(){
         if(Math.sqrt(Math.pow(this.x-player.cx,2)+Math.pow(this.yfr*(DOWN-UP)+UP-player.cy,2)) < secWidth/3+player.size/2.5){
-            console.log("collision detected")
+            const a=new Audio();
+            a.src="sounds/PowerUp.wav";
+            a.volume=0.3;
+            a.play();
             if (this.type=="invincible"){
                 icount+=1
                 player.invincible=true;
@@ -235,10 +241,18 @@ class Powerup{
                 setTimeout(() => {
                     icount-=1;
                     if(icount==0){
-                        document.getElementById("invincible").style.display="none";
-                        player.invincible=false;
+                        const a=new Audio();
+                        a.src="sounds/PowerDown.mp3";
+                        a.volume=0.2;
+                        a.play();
+                        setTimeout(()=>{
+                            if(icount==0){
+                            document.getElementById("invincible").style.display="none";
+                            player.invincible=false;
+                            }
+                        },200);                      
                     }           
-                }, 5000);
+                }, 4800);
             }
             else if(this.type="slowdown"){
                 slowdown=true;
@@ -246,13 +260,21 @@ class Powerup{
                 document.getElementById("slowdown").style.display="";
                 setTimeout(() => {
                     scount-=1;
-                    if(scount==0){
-                        document.getElementById("slowdown").style.display="none";
-                        slowdown=false;
-                    }
-                }, 5000);
+                    if(icount==0){
+                        const a=new Audio();
+                        a.src="sounds/PowerDown.mp3";
+                        a.volume=0.2;
+                        a.play();
+                        setTimeout(()=>{
+                            if(scount==0){
+                            document.getElementById("slowdown").style.display="none";
+                            slowdown=false;
+                            }
+                        },200);                      
+                    }           
+                }, 4800);
             }
-            this.x=-100;
+            this.x=-500;
         }else{
             return;
         }
@@ -263,6 +285,10 @@ class Powerup{
 //game controls - event listeners
 
 addEventListener("mousedown", ()=>{
+    const a=new Audio();
+    a.src="sounds/jump.mp3"
+    a.volume=0.3;
+    a.play();
     if(player.pos=="d"){
         player.pos="u";
     }else if(player.pos=="u"){
@@ -273,6 +299,10 @@ addEventListener("mousedown", ()=>{
 
 addEventListener("keydown", (ev) => {
     if (ev.key===" "){
+        const a=new Audio();
+        a.src="sounds/jump.mp3"
+        a.volume=0.3;
+        a.play();
         if(player.pos=="d"){
             player.pos="u";
         }else if(player.pos=="u"){
@@ -323,9 +353,7 @@ function checkCollisions(){
     })        
     }
     powerups.forEach( (e) => {
-        if(e.checkCollision()){
-            terminate();
-        }
+        e.checkCollision();
     })  
 }
 function randomElement(){
@@ -415,7 +443,7 @@ function play(){
     drawScene();
     drawElements();
     if(powerups.length){
-        if(powerups[0].x < -100){
+        if(powerups[0].x < -secWidth){
             powerups.shift();
         }
     }
