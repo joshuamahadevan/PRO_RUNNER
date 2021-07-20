@@ -57,7 +57,6 @@ class Player{
         c.lineTo(this.size,0);
         c.lineTo(this.size/2,-this.size)
         c.fill();
-
         c.restore();
     }
     update(){
@@ -215,21 +214,19 @@ class Powerup{
         else if(this.type="slowdown"){
             img.src="./svgs/slowdown.svg"
         }
-        if(this.yfr*(DOWN-UP)>secWidth/4 && (1-this.yfr)*(DOWN-UP)>secWidth/4){
-            c.strokeRect(this.x,this.yfr*(DOWN-UP)+UP,secWidth/4,secWidth/4);
-            c.drawImage(img,this.x,this.yfr*(DOWN-UP)+UP,secWidth/4,secWidth/4);
-        }else if(this.yfr*(DOWN-UP)<secWidth/4){
-            c.strokeRect(this.x,UP,secWidth/4,secWidth/4);
+        if(this.yfr*(DOWN-UP)<secWidth/4){
+            this.yfr=secWidth/(4*(DOWN-UP));
             c.drawImage(img,this.x,UP,secWidth/4,secWidth/4);
-        }else if((1-this.yfr)*(DOWN-UP)>secWidth/4){
-            c.strokeRect(this.x,DOWN-secWidth/4,secWidth/4,secWidth/4);
+        }else if((1-this.yfr)*(DOWN-UP)<secWidth/4){
+            this.yfr=1-secWidth/(4*(DOWN-UP));
             c.drawImage(img,this.x,DOWN-secWidth/4,secWidth/4,secWidth/4);
+        }else{
+            c.drawImage(img,this.x,this.yfr*(DOWN-UP)+UP,secWidth/4,secWidth/4);
         }
-        
     }
 
     checkCollision(){
-        if(Math.sqrt(Math.pow(this.x-player.cx,2)+Math.pow(this.yfr*(DOWN-UP)+UP-player.cy,2)) < secWidth/3+player.size/2.5){
+        if(Math.sqrt(Math.pow(this.x+secWidth/8-player.cx,2)+Math.pow(this.yfr*(DOWN-UP)+secWidth/8+UP-player.cy,2)) < secWidth/4+player.size/4){
             const a=new Audio();
             a.src="sounds/PowerUp.wav";
             a.volume=0.3;
@@ -260,7 +257,7 @@ class Powerup{
                 document.getElementById("slowdown").style.display="";
                 setTimeout(() => {
                     scount-=1;
-                    if(icount==0){
+                    if(scount==0){
                         const a=new Audio();
                         a.src="sounds/PowerDown.mp3";
                         a.volume=0.2;
@@ -274,7 +271,7 @@ class Powerup{
                     }           
                 }, 4800);
             }
-            this.x=-500;
+            this.x=-1000;
         }else{
             return;
         }
@@ -454,12 +451,8 @@ function play(){
     })
     player.draw();
 
-
-
     //checking for collisions
     checkCollisions();
-    
-
 
     //identifying 
     if(x>=secWidth){
